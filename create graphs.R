@@ -25,6 +25,18 @@ googlesheets4::gs4_auth(token = drive_token())
 
 setwd("../CT and LR with Brendon")
 
+
+partylist_l <- c("Socialist Left", "Social Democrat", "Conservativ" ,
+                 "Liberal",        "Agrarian"  ,      "Christian"   ,             
+                 "Progress" ,      "Green")      
+
+
+partylist_n <- c("lsoc",  "socdem", "cons"   , 
+                 "liber", "agrar" , "christ" , 
+                 "progr", "green" )
+
+#### GET DATA ----------
+
 mydata <-
  read_from_gsheet(googlesheet_key = "1HHTxRCQ5_MnP5kPqDeEpyGwuIurmxCq60h6TTN7NwAw",
                  sheet_name_to_read = "Party_family_preference_by_CB_LR",
@@ -35,223 +47,268 @@ mydata <-
   hablar::retype() %>% 
   filter(!is.na(top_2_cb)) 
 
-
-
-# remove non significant numbers
+# remove non significant numbers in alternative data
 mydata_na <- mydata
 for (i in 2:ncol(mydata)) {
   for (j in 1:nrow(mydata)) {
     if (is.na(mydata[j, i]))  {
-      mydata_na[j, i - 1] <- NA
+      mydata_na[j, i - 1] <- NA  # drop the value in the column on left side
     }
   }
 }
 
+# replace the NA in main
+mydata <- mydata %>% 
+  mutate(across(.cols = ends_with("_sig"), ~str_replace_na(., replacement = ""))) %>%  # Make all NA sig to "not sign."
+  mutate(across(.cols = ends_with("_sig"), ~as_numeric(str_length(.)))) %>%
+  # transmute(across(.cols = ends_with("_sig"), ~str_length(.))) %>%
+  set_labels(., ends_with("_sig"), labels = c("non sign." = 0  , 
+                              "0.05"      = 1        ,
+                              "0.01"      = 2        ,
+                              "0.001"     = 3   ) ,
+            force.labels = TRUE ) %>% 
+  as_factor(., ends_with("_sig"), add.non.labelled = TRUE) 
 
-totparty <- mydata_na %>%
+str(mydata)
+names(mydata)
+Hmisc::contents(mydata)
+
+
+# make labels-factors
+  mydata <- 
+  rename(mydata, 
+         socialist_left_sig = sl_sig,
+         soc_dem_sig = sd_sig,
+         agrarian_sig = ag_sig,
+         liberal_sig = lib_sig,
+         christian_sig = chr_sig,
+         conservative_sig = con_sig,
+         progress_sig = pro_sig,
+         green_sig = gr_sig,
+         other_sig = o_sig) 
+             
+
+str(mydata)  
+names(mydata)
+Hmisc::contents(mydata)
+
+
+
+#### 19 Cases -------------
+
+Totparty19 <- mydata_na %>%
   dplyr::slice_max(., order_by = n, n = 19) %>% 
   remove_col_if_ends_with("sig") %>% 
   arrange(mean_left_right)
 
-summarise(totparty, n, top_2_cb, mean_left_right )  # a check   
+summarise(Totparty19, n, top_2_cb, mean_left_right )  # a check   
 
 
-names(totparty)
-write.csv2(totparty, "totparty_preference_by_cultural_bias_sig.csv")
+names(Totparty19)
+write.csv2(Totparty19, "Totparty19_preference_by_cultural_bias_sig.csv")
 
-# totparty <-  read.csv2("totparty_preference_by_cultural_bias_sig.csv")  
+# Totparty19 <-  read.csv2("Totparty19_preference_by_cultural_bias_sig.csv")  
 
-partylist <- names(totparty[2:9])
+partylist <- names(Totparty19[2:9])
 
 
-totparty_long <-
-gather(totparty, 
+
+
+#### All 57 cases
+
+Totparty57 <- mydata %>%
+  dplyr::slice_max(., order_by = n, n = 57) %>% 
+  arrange(mean_left_right) 
+
+summarise(Totparty57, n, top_2_cb, mean_left_right )  # a check   
+
+
+names(Totparty57)
+write.csv2(Totparty57, "Totparty57_preference_by_cultural_bias_sig.csv")
+
+# Totparty57 <-  read.csv2("Totparty57_preference_by_cultural_bias_sig.csv")  
+
+
+
+
+
+
+#### Data into Long format -----------
+
+Totparty19_long <-
+gather(Totparty19, 
        socialist_left, soc_dem, agrarian  , liberal ,
        christian , conservative, progress, green  , 
        key = "party_family",
        value = "support_pct" )
 
 
+Totparty57_long <-
+  gather(Totparty57, 
+         socialist_left, soc_dem, agrarian  , liberal ,
+         christian , conservative, progress, green  , 
+         key = "party_family",
+         value = "support_pct" )
 
 
 
 
-# socialist_left  
-ggplot2::ggplot(totparty, aes(mean_left_right, socialist_left)) + 
-  ggplot2::geom_point(color = "grey", aes(size = n))               +
-  ggrepel::geom_label_repel(aes(label = top_2_cb))        +
-  ggplot2::labs(x = "Mean Left-Right Position",
-                y = "Socialist Left Party Family Supporters (percent)",
-                caption ="Only significant deviations in party preference are included.")  
-
-ggplot2::ggsave(filename = "socialist_left LF.png",
-                width = 12,
-                units = "cm",
-                dpi = 300)  
-
-
-
-# soc_dem  
-ggplot2::ggplot(totparty, aes(mean_left_right, soc_dem)) + 
-  ggplot2::geom_point(color = "grey", aes(size = n))               +
-  ggrepel::geom_label_repel(aes(label = top_2_cb))        +
-  ggplot2::labs(x = "Mean Left-Right Position",
-                y = "Social Democratic Party Family Supporters (percent)",
-                caption ="Only significant deviations in party preference are included.")  
-
-ggplot2::ggsave(filename = "soc_dem LF.png",
-                width = 12,
-                units = "cm",
-                dpi = 300)  
-
-
-# agrarian  
-ggplot2::ggplot(totparty, aes(mean_left_right, agrarian)) + 
-  ggplot2::geom_point(color = "grey", aes(size = n))               +
-  ggrepel::geom_label_repel(aes(label = top_2_cb))        +
-  ggplot2::labs(x = "Mean Left-Right Position",
-                y = "Agrarian Party Family Supporters (percent)",
-                caption ="Only significant deviations in party preference are included.")  
-
-ggplot2::ggsave(filename = "agrarian LF.png",
-                width = 12,
-                units = "cm",
-                dpi = 300)  
-
-# Liberal  
-ggplot2::ggplot(totparty, aes(mean_left_right, liberal)) + 
-  ggplot2::geom_point(color = "grey", aes(size = n))               +
-  ggrepel::geom_label_repel(aes(label = top_2_cb))        +
-  ggplot2::labs(x = "Mean Left-Right Position",
-                y = "Liberal Party Family Supporters (percent)",
-                caption ="Only significant deviations in party preference are included.")  
-
-ggplot2::ggsave(filename = "Liberal LF.png",
-                width = 12,
-                units = "cm",
-                dpi = 300)  
-
-# Christian  
-ggplot2::ggplot(totparty, aes(mean_left_right, christian)) + 
-  ggplot2::geom_point(color = "grey", aes(size = n))               +
-  ggrepel::geom_label_repel(aes(label = top_2_cb))        +
-  ggplot2::labs(x = "Mean Left-Right Position",
-                y = "Christian Party Family Supporters (percent)",
-                caption ="Only significant deviations in party preference are included.")  
-
-ggplot2::ggsave(filename = "Christian LF.png",
-                width = 12,
-                units = "cm",
-                dpi = 300)  
-
-
-
-# Green  
-ggplot2::ggplot(totparty, aes(mean_left_right, green)) + 
-  ggplot2::geom_point(color = "grey", aes(size = n))               +
-  ggrepel::geom_label_repel(aes(label = top_2_cb))        +
-  ggplot2::labs(x = "Mean Left-Right Position",
-                y = "Green Party Family Supporters (percent)",
-                caption ="Only significant deviations in party preference are included.")  
-
-ggplot2::ggsave(filename = "Green LF.png",
-                width = 12,
-                units = "cm",
-                dpi = 300)  
-
-
-# Conservative  
-ggplot2::ggplot(totparty, aes(mean_left_right, conservative)) + 
-  ggplot2::geom_point(color = "grey", aes(size = n))               +
-  ggrepel::geom_label_repel(aes(label = top_2_cb))        +
-  ggplot2::labs(x = "Mean Left-Right Position",
-                y = "Conservative Party Family Supporters (percent)",
-                caption ="Only significant deviations in party preference are included.")  
-
-ggplot2::ggsave(filename = "Conservative LF.png",
-                width = 12,
-                units = "cm",
-                dpi = 300)  
-
-# Progress  
-ggplot2::ggplot(totparty, aes(mean_left_right, progress)) + 
-  ggplot2::geom_point(color = "grey", aes(size = n))               +
-  ggrepel::geom_label_repel(aes(label = top_2_cb))        +
-  ggplot2::labs(x = "Mean Left-Right Position",
-                y = "Progress Party Family Supporters (percent)",
-                caption ="Only significant deviations in party preference are included.")  
-
-ggplot2::ggsave(filename = "Progress LF.png",
-                width = 12,
-                units = "cm",
-                dpi = 300)  
-
-partylist
-
-# socialist_left  and Conservative
-
-totparty_long %>% 
-  filter(str_detect(party_family,"socialist_left|conservative")) %>% 
-  ggplot(., aes(mean_left_right, support_pct)) + 
-  ggplot2::geom_point(aes(size = n, shape = party_family)) +
-  scale_shape_manual(values = c(1,4)) +
-    scale_shape_manual(values = c(1,4)) +
-  ggrepel::geom_label_repel(aes(label = top_2_cb))        +
-  labs(x = "Mean Left-Right Position",
-                y = "Party Family Supporters (percent)",
-                caption = "Only significant deviations in party preference are included.")  +
-  theme_gray()
-
-
-   #  geom_text(aes(label = top_2_cb, size = n, color = party_family)) +  
-
-ggplot2::ggsave(filename = "socialist_conservative LF.png",
-                width = 12,
-                units = "cm",
-                dpi = 300)  
-
-
-
-
-totparty_long %>% 
-  filter(str_detect(party_family,"progress|soc_dem")) %>% 
-  ggplot(., aes(mean_left_right, support_pct)) + 
-  ggplot2::geom_point(aes(size = n, shape = party_family)) +
-  scale_shape_manual(values = c(1,4,22)) +
-  ggrepel::geom_label_repel(aes(label = top_2_cb))        +
-  labs(x = "Mean Left-Right Position",
-       y = "Party Family Supporters (percent)",
-       caption = "Only significant deviations in party preference are included.")  +
-  theme_gray()
-
-
+# MAKE Graphs ------------
+# NO LINE 
 # 
-# for (partynm in partylist) {
-#   yaxis <- partynm
-#   print(yaxis)
-#   yaxislabel <- snakecase::to_title_case(paste0(partynm, " Party Party Supporters (percent)"))
-#   filenm <- paste0(yaxislabel, ".png")
-#   print(
-#   ggplot2::ggplot(totparty, aes(mean_left_right, yaxis)) + 
-#   ggplot2::geom_point(color = "grey", aes(size = n))               +
-#   ggrepel::geom_label_repel(aes(label = top_2_cb))        +
-#   ggplot2::labs(x = "Mean Left-Right Position",
-#        y = yaxislabel,
-#        caption ="Only significant deviations in party preference are included."
-#        )
-# 
-# 
-#   )
+# for (i in seq_along(partylist)) {
+#   # linedata <-  Totparty57_long  %>% 
+#   #   filter(str_detect(party_family,partylist[i])) %>% 
+#   #   select(mean_left_right, support_pct)
 #   
-#   Sys.sleep(5)
+#   Totparty19_long %>% 
+#     filter(str_detect(party_family,partylist[i])) %>% 
+#     ggplot(., aes(mean_left_right, support_pct)) + 
+#     ggplot2::geom_point(aes(size = n)) +
+#     labs(title = str_to_title(paste0(partylist_l[i], " Party Family")),
+#          caption = "Only statistically significant of the 19 most frequent top 2 cultural biases are included.")  +
+#     xlab("Mean Left-Right Position") +
+#     ylab(paste0(partylist_l[i], " Party Family Supporters (percent)")) +
+#     ggrepel::geom_label_repel(aes(label = top_2_cb))        +
+#     # ggplot2::stat_smooth(data = linedata,
+#                          # method = "loess", 
+#                          # fullrange = FALSE,
+#                          # se = FALSE,
+#                          # span = 4) +
+#     theme_gray() + 
+#     theme(plot.caption = element_text(size = rel(0.55)))
 #   
-#   ggplot2::ggsave(filename = filenm,
+#   print(partylist_l[i])
+#   
+#   ggplot2::ggsave(filename = paste0(partylist[i],"_loess_noline_dots19.png"),
+#                   width = 12,
+#                   units = "cm",
+#                   dpi = 300)  
+# }
+
+
+
+
+#### Graphs with 57 cases for the line and 19 dots ----
+
+
+for (i in seq_along(partylist)) {
+linedata <-  Totparty57_long  %>% 
+  filter(str_detect(party_family,partylist[i])) %>% 
+  select(mean_left_right, support_pct)
+  
+Totparty19_long %>% 
+  filter(str_detect(party_family,partylist[i])) %>% 
+  ggplot(., aes(mean_left_right, support_pct)) + 
+  ggplot2::geom_point(aes(size = n)) +
+  labs(title = str_to_title(paste0(partylist_l[i], " Party Family")),
+       caption = "Only statistically significant of the 19 most frequent top 2 cultural biases are included. Loess smoothed line.")  +
+  xlab("Mean Left-Right Position") +
+  ylab(paste0(partylist_l[i], " Party Family Supporters (percent)")) +
+    ggrepel::geom_label_repel(aes(label = top_2_cb))        +
+  ggplot2::stat_smooth(data = linedata,
+                       method = "loess", 
+                       fullrange = FALSE,
+                       se = FALSE,
+                       span = 4) +
+   theme_gray() + 
+      theme(plot.caption = element_text(size = rel(0.55)))
+
+  print(partylist_l[i])
+  
+  ggplot2::ggsave(filename = paste0(partylist[i],"_loess_line57_dots19.png"),
+                  width = 12,
+                  units = "cm",
+                  dpi = 300)  
+  }
+
+#### Graphs with 57 cases ----
+
+tabyl(Totparty57_long, green_sig)
+
+for (i in seq_along(partylist)) {
+ linedata <-  Totparty57_long  %>% 
+   filter(str_detect(party_family,partylist[i])) %>% 
+   select(mean_left_right, support_pct)
+  
+  Totparty57_long %>% 
+    filter(str_detect(party_family,partylist[i])) %>% 
+    ggplot(., aes(x = mean_left_right, 
+                  y = support_pct)) +
+    guides(fill = "none") +
+    ggplot2::geom_point(size = 4.5, color = "#707070") +
+    labs(title = str_to_title(partylist_l[i]),
+         caption = "All 57 cultural combinations are included. Loess smoothed line.")  +
+    xlab("Mean Left-Right Position") +
+    ylab("Party Family Supporters (percent)") +
+   # scale_shape_manual(values = c(1,4,22)) +
+    ggrepel::geom_label_repel(aes(label = top_2_cb))        +
+    ggplot2::stat_smooth(method = "loess", 
+                         fullrange = FALSE,
+                         se = FALSE,
+                         span = 3) +
+    theme_gray() + 
+    theme(plot.caption = element_text(size = rel(0.55))) 
+
+  print(partylist[i])
+  
+  
+  ggplot2::ggsave(filename = paste0(partylist[i],"_loess_line57_dots57.png"),
+                  width = 12,
+                  units = "cm",
+                  dpi = 600)  
+}
+
+# #### Graphs with 57 cases ----
+# 
+# tabyl(Totparty57_long, green_sig)
+# 
+# for (i in seq_along(partylist)) {
+#   linedata <-  Totparty57_long  %>% 
+#     filter(str_detect(party_family,partylist[i])) %>% 
+#     select(mean_left_right, support_pct)
+#   
+#   Totparty57_long %>% 
+#     filter(str_detect(party_family,partylist[i])) %>% 
+#     ggplot(., aes(x = mean_left_right, 
+#                   y = support_pct)) +
+#     guides(fill = "none") +
+#     ggplot2::geom_point(aes_string(col = paste0(partylist[i], "_sig")), size = 5) +
+#     scale_colour_grey(
+#       start = 1,
+#       end = 0.3,
+#       aesthetics = "colour",
+#       labels = c("non sign.", "0.05" , "0.01", "0.001"),
+#       limits = c(0, 1, 2, 3))  +
+#     
+#     labs(title = str_to_title(partylist[i]),
+#          caption = "All 57 cultural combinations are included. Loess smoothed line.")  +
+#     xlab("Mean Left-Right Position") +
+#     ylab("Party Family Supporters (percent)") +
+#     # scale_shape_manual(values = c(1,4,22)) +
+#     ggrepel::geom_label_repel(aes(label = top_2_cb))        +
+#     ggplot2::stat_smooth(method = "loess", 
+#                          fullrange = FALSE,
+#                          se = FALSE,
+#                          span = 3) +
+#     theme_gray() + 
+#     theme(plot.caption = element_text(size = rel(0.55))) 
+#   
+#   print(partylist[i])
+#   
+#   ggplot2::ggsave(filename = paste0(partylist[i],"_loess_line57_dots57_sign.png"),
 #                   width = 12,
 #                   units = "cm",
 #                   dpi = 300)  
 # }
 # 
 
+
+
+
+for (i in seq_along(partylist)) {
+   print(partylist[i])
+}
 
   
 
