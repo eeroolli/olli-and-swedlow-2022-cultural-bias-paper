@@ -94,9 +94,9 @@ Hmisc::contents(mydata)
 
 
 
-#### 19 Cases -------------
-
-Totparty19 <- mydata_na %>%
+#### All 19 Cases -------------
+# Totparty19 <- mydata_na %>%     # only the signifcant cases
+Totparty19 <- mydata %>% # All 19 cases
   dplyr::slice_max(., order_by = n, n = 19) %>% 
   remove_col_if_ends_with("sig") %>% 
   arrange(mean_left_right)
@@ -202,7 +202,7 @@ Totparty19_long %>%
   ggplot(., aes(mean_left_right, support_pct)) + 
   ggplot2::geom_point(aes(size = n)) +
   labs(title = str_to_title(paste0(partylist_l[i], " Party Family")),
-       caption = "Only statistically significant of the 19 most frequent top 2 cultural biases are included. Loess smoothed line.")  +
+       caption = "The 19 most frequent top 2 cultural biases are included. Loess smoothed line.")  +
   xlab("Mean Left-Right Position") +
   ylab(paste0(partylist_l[i], " Party Family Supporters (percent)")) +
     ggrepel::geom_label_repel(aes(label = top_2_cb))        +
@@ -219,7 +219,7 @@ Totparty19_long %>%
   ggplot2::ggsave(filename = paste0(partylist[i],"_loess_line57_dots19.png"),
                   width = 12,
                   units = "cm",
-                  dpi = 300)  
+                  dpi = 600)  
   }
 
 #### Graphs with 57 cases ----
