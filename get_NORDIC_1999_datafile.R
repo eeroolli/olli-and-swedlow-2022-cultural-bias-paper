@@ -24,7 +24,7 @@ source("../Startup/eeros_functions.R")
 googledrive::drive_auth(email = "eero.olli@gmail.com")
 googlesheets4::gs4_auth(token = drive_token())
 
-setwd("../CT and LR with Brendon")
+setwd("../cultural-bias-and-left-right-paper")
 
 
 
@@ -39,7 +39,7 @@ mydata <-
   hablar::retype() 
 
 mydata$left_right01 <- hablar::as_reliable_num(mydata$left_right01)
-mydata$left_right01_b10 <- bin
+#mydata$left_right01_b10 <- bin
 
 
 
@@ -48,7 +48,7 @@ names(mydata)
 str(mydata)
 get_labels(mydata$totparty)
 
-recode()
+#recode()
 partylist_l <- c("Socialist Left", "Social Democrat", "Conservativ" ,
                  "Liberal",        "Agrarian"  ,      "Christian"   ,             
                  "Progress" ,      "Greens")      
@@ -67,7 +67,7 @@ partylist_dummies <-  c("lsoc_dummy"  , "socdem_dummy",   "cons_dummy" ,
 
 tabyl(mydata, "lsoc_dummy")
 
-for (i in seq_along(partylist_l)){
+for (i in seq_along(partylist_l)) {
   mydata
 }
 mydata 
@@ -172,24 +172,22 @@ print("This is a bad model. very low predicting ability")
 
 
 
-###############################-----------------------------------------  
+##LEARN purrr::map ###########-----------------------------------------  
 linedata %>%
-  
-  LEARN purrr::map(
-    
-    
-    
-  )
-map_dfr(  
-case_when(
-  str_detect(linedata$lsoc_dummy, "this party")  ~ 1L ,
-  str_detect(linedata$lsoc_dummy, "other party") ~ 0L ,
-  TRUE                                           ~ NA_integer_ )
-  
-  
-  char_vec <- sample(c("a", "b", "c"), 10, replace = TRUE)
-  level_key <- c(a = "apple", b = "banana", c = "carrot")
-  recode(char_vec, !!!level_key)
+#   LEARN purrr::map(
+#     
+#     
+#     
+#   )
+# map_dfr(  
+# case_when(
+#   str_detect(linedata$lsoc_dummy, "this party")  ~ 1L ,
+#   str_detect(linedata$lsoc_dummy, "other party") ~ 0L ,
+#   TRUE                                           ~ NA_integer_ )
+# 
+#   char_vec <- sample(c("a", "b", "c"), 10, replace = TRUE)
+#   level_key <- c(a = "apple", b = "banana", c = "carrot")
+#   recode(char_vec, !!!level_key)
   
   
   
@@ -210,7 +208,7 @@ str(linedata)
 party_family_support <- tibble(partyname = NA_character_, 
                                support_pct = NA_real_,
                                left_right01 = NA_real_,
-                               country = NA_character_
+                               country = NA_character_,
                                .rows = 8)
 
 for (i in seq_along(partylist_n)) {
@@ -276,7 +274,7 @@ for (i in seq_along(partylist_l)) {
     theme_gray()
   
   print(partylist_l[i])
-}
+
   
   ggplot2::ggsave(filename = paste0(partylist_n[i],"_ind_linedata.png"),
                   width = 12,
@@ -322,17 +320,13 @@ ggplot2::ggplot(linedata, aes(left_right01, totparty)) +
 
 
 ggplot2::ggplot(linedata, aes(left_right01, totparty)) + 
-  ggplot2::geom_pointrange() 
-
-totparty,
-
-+
+  ggplot2::geom_pointrange() +  
   geom_jitter(height = 0.2, width = 0)
 
-    ggplot2::geom_line(color = "grey", aes(group = n))               +
+  ggplot2::geom_line(color = "grey", aes(group = n))               +
   ggplot2::labs(x = "Mean Left-Right Position",
                 y = "Social Democratic Party Family Supporters (percent)",
-                caption ="Only significant deviations in party preference are included.")  
+                caption = "Only significant deviations in party preference are included.")  
 
 ggplot2::ggsave(filename = "soc_dem LF.png",
                 width = 12,
