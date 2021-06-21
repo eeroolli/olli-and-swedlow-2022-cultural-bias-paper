@@ -114,7 +114,7 @@ partylist <- names(Totparty19[2:9])
 
 
 
-#### All 57 cases
+#### All 57 cases are used to create the LloWess Soothed line
 
 Totparty57 <- mydata %>%
   dplyr::slice_max(., order_by = n, n = 57) %>% 
@@ -192,11 +192,14 @@ Totparty57_long <-
 #### Graphs with 57 cases for the line and 19 dots ----
 
 
+plots_19 = list()
+
 for (i in seq_along(partylist)) {
 linedata <-  Totparty57_long  %>% 
   filter(str_detect(party_family,partylist[i])) %>% 
   select(mean_left_right, support_pct)
   
+the_plot <-
 Totparty19_long %>% 
   filter(str_detect(party_family,partylist[i])) %>% 
   ggplot(., aes(mean_left_right, support_pct)) + 
@@ -216,11 +219,55 @@ Totparty19_long %>%
 
   print(partylist_l[i])
   
+  plots_19[[partylist_l[i]]] <- the_plot
+  
+  # plots_19 <- the_plot
+  
   ggplot2::ggsave(filename = paste0(partylist[i],"_loess_line57_dots19.png"),
                   width = 12,
                   units = "cm",
                   dpi = 600)  
-  }
+}
+
+using_packages("ggplot2","patchwork", "dplyr")
+
+knitr::opts_chunk$set(echo = TRUE,
+                      fig.height = 9,
+                      fig.width = 9)
+
+p1 <- ggplot(mtcars) + geom_point(aes(mpg, disp))
+p2 <- ggplot(mtcars) + geom_boxplot(aes(gear, disp, group = gear))
+
+
+plots_19[["Socialist Left"]] 
+plots_19[["Social Democrat"]]
+
+p1 + p2
+  
+plots_19[["Conservativ"]] +
+  plots_19[["Liberal"]] +
+  plots_19[["Agrarian"]] +
+  plots_19[["Christian"]] +
+  plots_19[["Progress"]] +
+  plots_19[["Green"]] 
+  
+wrap_plots(p1) + wrap_plots(p2)  
+  
+  
+plots_19["Socialist Left"] +
+  plots_19["Social Democrat"] +
+  plots_19["Conservativ"] +
+  plots_19["Liberal"] +
+  plots_19["Agrarian"] +
+  plots_19["Christian"] +
+  plots_19["Progress"] +
+  plots_19["Green"] +
+  plot_layout(ncol = 3, byrow = FALSE)
+
+
+
+
+
 
 #### Graphs with 57 cases ----
 
