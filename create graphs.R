@@ -10,13 +10,15 @@ library(tidyverse)
 library(sjmisc)
 library(sjlabelled)
 library(readxl)
-library(ggplot2)
 library(svMisc)
 library(janitor)
 library(hablar)
 library(googledrive)
 library(googlesheets4)
 library(dplyr)
+library(ggplot2)
+library(patchwork)
+
 
 source("../Startup/eeros_functions.R")
 
@@ -191,11 +193,15 @@ Totparty57_long <-
 
 #### Graphs with 57 cases for the line and 19 dots ----
 
+# knitr::opts_chunk$set(echo = TRUE,
+#                      fig.height = 9,
+#                      fig.width = 9)
 
-plots_19 = list()
+
+plots_19 = list() # must be defined before the for() 
 
 for (i in seq_along(partylist)) {
-linedata <-  Totparty57_long  %>% 
+linedata <-  Totparty57_long  %>%   
   filter(str_detect(party_family,partylist[i])) %>% 
   select(mean_left_right, support_pct)
   
@@ -204,17 +210,18 @@ Totparty19_long %>%
   filter(str_detect(party_family,partylist[i])) %>% 
   ggplot(., aes(mean_left_right, support_pct)) + 
   ggplot2::geom_point(aes(size = n)) +
-  labs(title = str_to_title(paste0(partylist_l[i], " Party Family")),
-       caption = "The 19 most frequent top 2 cultural biases are included. Loess smoothed line.")  +
-  xlab("Mean Left-Right Position") +
-  ylab(paste0(partylist_l[i], " Party Family Supporters (percent)")) +
-    ggrepel::geom_label_repel(aes(label = top_2_cb))        +
+  labs(title = str_to_title(paste0(partylist_l[i])))  + # , " Party Family"
+  xlab("Mean Left-Right") +
+  ylab("") +  #Supporters (percent)
   ggplot2::stat_smooth(data = linedata,
                        method = "loess", 
                        fullrange = FALSE,
                        se = FALSE,
                        span = 4) +
-   theme_gray() + 
+  ggrepel::geom_label_repel(aes(label = top_2_cb),
+                            label.padding = 0.15,
+                            size = 2)        +
+  theme_gray() + 
       theme(plot.caption = element_text(size = rel(0.55)))
 
   print(partylist_l[i])
@@ -229,44 +236,35 @@ Totparty19_long %>%
                   dpi = 600)  
 }
 
-using_packages("ggplot2","patchwork", "dplyr")
 
-knitr::opts_chunk$set(echo = TRUE,
-                      fig.height = 9,
-                      fig.width = 9)
+#### Collect all plots on one page. ------------
+#### using the Patchwork package
 
-p1 <- ggplot(mtcars) + geom_point(aes(mpg, disp))
-p2 <- ggplot(mtcars) + geom_boxplot(aes(gear, disp, group = gear))
-
-
-plots_19[["Socialist Left"]] 
-plots_19[["Social Democrat"]]
-
-p1 + p2
-  
-plots_19[["Conservativ"]] +
-  plots_19[["Liberal"]] +
+plots_19[["Socialist Left"]] +
+plots_19[["Social Democrat"]] +
+plots_19[["Conservativ"]]  +
+ plots_19[["Liberal"]] +
   plots_19[["Agrarian"]] +
   plots_19[["Christian"]] +
-  plots_19[["Progress"]] +
-  plots_19[["Green"]] 
+ plots_19[["Progress"]] +
+  plots_19[["Green"]] +
+  guide_area() +
+  plot_layout(ncol = 3, 
+              nrow = 3, 
+              byrow = TRUE,
+              guides =  "collect") +
+  plot_annotation(title = "Support for Party Family (percent)", 
+  caption = "Dots show the 19 most frequent Top Two Cultural Biases. Loess smoothed line.") 
+
+
+
+ggplot2::ggsave(filename = "8_Partyfamilies_loess_line57_dots19.png",
+                width = 21,
+                height = 27,
+                units = "cm",
+                dpi = 600)   
+
   
-wrap_plots(p1) + wrap_plots(p2)  
-  
-  
-plots_19["Socialist Left"] +
-  plots_19["Social Democrat"] +
-  plots_19["Conservativ"] +
-  plots_19["Liberal"] +
-  plots_19["Agrarian"] +
-  plots_19["Christian"] +
-  plots_19["Progress"] +
-  plots_19["Green"] +
-  plot_layout(ncol = 3, byrow = FALSE)
-
-
-
-
 
 
 #### Graphs with 57 cases ----
