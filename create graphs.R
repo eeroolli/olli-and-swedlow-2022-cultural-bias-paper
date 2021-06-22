@@ -28,7 +28,7 @@ googlesheets4::gs4_auth(token = drive_token())
 setwd("../CT and LR with Brendon")
 
 
-partylist_l <- c("Socialist Left", "Social Democrat", "Conservativ" ,
+partylist_l <- c("Socialist Left", "Social Democrat", "Conservative" ,
                  "Liberal",        "Agrarian"  ,      "Christian"   ,             
                  "Progress" ,      "Green")      
 
