@@ -239,30 +239,33 @@ Totparty19_long %>%
 
 #### Collect all plots on one page. ------------
 #### using the Patchwork package
-
 plots_19[["Socialist Left"]] +
-plots_19[["Social Democrat"]] +
-plots_19[["Conservativ"]]  +
- plots_19[["Liberal"]] +
+  plots_19[["Social Democrat"]] +
   plots_19[["Agrarian"]] +
   plots_19[["Christian"]] +
- plots_19[["Progress"]] +
+  plots_19[["Conservative"]]  +
+  plots_19[["Progress"]] +
   plots_19[["Green"]] +
+  plots_19[["Liberal"]] +
   guide_area() +
-  plot_layout(ncol = 3, 
-              nrow = 3, 
-              byrow = TRUE,
-              guides =  "collect") +
-  plot_annotation(title = "Support for Party Family (percent)", 
-  caption = "Dots show the 19 most frequent Top Two Cultural Biases. Loess smoothed line.") 
+  plot_layout(
+    ncol = 3,
+    nrow = 3,
+    byrow = TRUE,
+    guides =  "collect"
+  ) +
+  plot_annotation(title = "Support for Party Family (percent)",
+                  caption = "Dots show the 19 most frequent and the Loess smoothed line uses all 57 Top Two Cultural Biases.")
+# "Dots show the 19 most frequent Top Two Cultural Biases. Loess smoothed line.")
 
 
-
-ggplot2::ggsave(filename = "8_Partyfamilies_loess_line57_dots19.png",
-                width = 21,
-                height = 27,
-                units = "cm",
-                dpi = 600)   
+ggplot2::ggsave(
+  filename = "8_Partyfamilies_loess_line57_dots19.png",
+  width = 21,
+  height = 27,
+  units = "cm",
+  dpi = 600
+)
 
   
 
