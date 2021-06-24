@@ -111,9 +111,18 @@ write.csv2(Totparty19, "Totparty19_preference_by_cultural_bias_sig.csv")
 
 # Totparty19 <-  read.csv2("Totparty19_preference_by_cultural_bias_sig.csv")  
 
-partylist <- names(Totparty19[2:9])
+partylist <- c(
+  "socialist_left" ,
+  "soc_dem" ,
+  "conservative" ,
+  "liberal"     ,
+  "agrarian"    ,
+  "christian"  ,
+  "progress"   ,
+  "green"
+)
 
-
+#names(Totparty19[2:9]  # these are in wrong order!
 
 
 #### All 57 cases are used to create the LloWess Soothed line
@@ -254,10 +263,9 @@ plots_19[["Socialist Left"]] +
     byrow = TRUE,
     guides =  "collect"
   ) +
-  plot_annotation(title = "Support for Party Family (percent)",
-                  caption = "Dots show the 19 most frequent and the Loess smoothed line uses all 57 Top Two Cultural Biases.")
+  plot_annotation(caption = "Dots show the 19 most frequent and the Loess smoothed line uses all 57 Top Two Cultural Biases.")
 # "Dots show the 19 most frequent Top Two Cultural Biases. Loess smoothed line.")
-
+# title = "Support for Party Family (percent)"   # removed because the Caption is text in the paper.
 
 ggplot2::ggsave(
   filename = "8_Partyfamilies_loess_line57_dots19.png",
