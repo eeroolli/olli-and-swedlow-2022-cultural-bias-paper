@@ -1,5 +1,5 @@
 # Eeros own file types
-*.png
+# *.png
 *.bak
 *secret_API_credentials.R
 
