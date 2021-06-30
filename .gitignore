@@ -3,10 +3,10 @@
 *.bak
 *secret_API_credentials.R
 # History files
-.Rhistory
-.Rapp.history
+*.Rhistory
+*.Rapp.history
 # Session Data files
-.RData
+*.RData
 # User-specific files
 .Ruserdata
 # Example code in package build process
@@ -17,7 +17,7 @@
 /*.Rcheck/
 # RStudio files
 .Rproj.user/
-.Rproj
+*.Rproj
 # produced vignettes
 vignettes/*.html
 vignettes/*.pdf
@@ -29,4 +29,6 @@ vignettes/*.pdf
 # Temporary files created by R markdown
 *.utf8.md
 *.knit.md
+
+# temporary files added with Ignore command in Rstudio
 soc_dem LF.png
