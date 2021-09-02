@@ -151,31 +151,43 @@ Totparty57_long <- Totparty57 %>%
 
 plots_19 = list() # must be defined before the for() 
 
-for (i in seq_along(partylist)) {
-linedata <-  Totparty57_long  %>%   
-  filter(str_detect(party_family,partylist[i])) %>% 
-  select(mean_left_right, support_pct)
-  
-the_plot <-
-Totparty19_long %>% 
-  filter(str_detect(party_family,partylist[i])) %>% 
-  ggplot(., aes(mean_left_right, support_pct)) + 
-  ggplot2::geom_point(aes(size = n)) +
-  labs(title = str_to_title(paste0(partylist_l[i])))  + # , " Party Family"
-  xlab("Mean Left-Right") +
-  ylab("") +  #Supporters (percent)
-  ggplot2::stat_smooth(data = linedata,
-                       method = "loess", 
-                       fullrange = FALSE,
-                       se = FALSE,
-                       span = 4) +
-  ggrepel::geom_label_repel(aes(label = top_2_cb),
-                            label.padding = 0.15,
-                            size = 2)        +
-  theme_gray() + 
-      theme(plot.caption = element_text(size = rel(0.55)))
 
+for (i in seq_along(partylist)) {
+  linedata <-  
+    Totparty57_long  %>%
+    filter(str_detect(party_family, partylist[i])) %>%
+    select(mean_left_right, support_pct)
+  
+  print(i)
+
+  ylabel <- 
+    if (str_detect(paste0("socialist_left ", "christian ", "green"), partylist[i])) {
+    "Support (percent)" }  else {
+    "  "}  
+    
+  the_plot <-
+    Totparty19_long %>%
+    filter(str_detect(party_family, partylist[i])) %>%
+    ggplot(., aes(mean_left_right, support_pct)) +
+    ggplot2::geom_point(aes(size = n)) +
+    labs(title = str_to_title(paste0(partylist_l[i])),
+        x = "Mean Left-Right",
+        y = ylabel )  + # , " Party Family"
+    ggplot2::stat_smooth(
+      data = linedata,
+      method = "loess",
+      fullrange = FALSE,
+      se = FALSE,
+      span = 4
+    ) +
+    ggrepel::geom_label_repel(aes(label = top_2_cb),
+                              label.padding = 0.15,
+                              size = 2)        +
+    theme_gray() +
+    theme(plot.caption = element_text(size = rel(0.55)))
+  
   print(partylist_l[i])
+  
   
   plots_19[[partylist_l[i]]] <- the_plot
   
@@ -190,6 +202,7 @@ Totparty19_long %>%
 
 #### Collect all plots on one page. ------------
 #### using the Patchwork package
+#### 
 plots_19[["Socialist Left"]] +
   plots_19[["Social Democrat"]] +
   plots_19[["Agrarian"]] +
@@ -205,7 +218,8 @@ plots_19[["Socialist Left"]] +
     byrow = TRUE,
     guides =  "collect"
   ) +
-  plot_annotation(caption = "Dots show the 19 most frequent and the Loess smoothed line uses all 57 Top Two Cultural Biases.")
+  plot_annotation(title = "Support for a Party Family (percent) by the Top Two Cultural Biases and Left-Right", 
+                  caption = "The Loess smoothed line uses all 57 Top Two Cultural Biases, while only dots for the 19 most common Top Two Cultural Biases are shown.")
 # "Dots show the 19 most frequent Top Two Cultural Biases. Loess smoothed line.")
 # title = "Support for Party Family (percent)"   # removed because the Caption is text in the paper.
 
