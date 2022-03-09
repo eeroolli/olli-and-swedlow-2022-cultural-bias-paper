@@ -1,7 +1,6 @@
-# cultural-bias-and-left-right-paper
-# Scripts needed to create tables and figures in the paper by Olli and Swedlow
+## Scripts needed to create tables and figures in the paper by Olli and Swedlow
+The paper is published as 
+Olli, E., & Swedlow, B. (2022). Cultural theory, rejection of cultural bias, and party preference. Party Politics, 135406882110710. https://doi.org/10.1177/13540688211071065
 
-# Our intention is to publish this paper in 2021.  It is a rewrite of the paper I presented at MPSA Chicago 2016.
-# The manuscript is sent to Party Politics 26.06.2021
 
 
