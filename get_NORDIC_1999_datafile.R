@@ -16,8 +16,6 @@ library(hablar)
 library(googledrive)
 library(googlesheets4)
 library(dplyr)
-library(ggplot2)
-library(patchwork)
 
 
 source("../Startup/eeros_functions.R")
@@ -104,7 +102,6 @@ Totparty19 <- mydata %>% # All 19 cases
   arrange(mean_left_right)
 
 summarise(Totparty19, n, top_2_cb, mean_left_right )  # a check   
-
 
 names(Totparty19)
 write.csv2(Totparty19, "Totparty19_preference_by_cultural_bias_sig.csv")
